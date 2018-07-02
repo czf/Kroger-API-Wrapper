@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Czf.apiwrapper.Kroger</AssemblyName>
+    <RootNamespace>Czf.ApiWrappers.Kroger</RootNamespace>
+    <Authors>czf</Authors>
+    <PackageId>Czf.apiwrapper.Kroger</PackageId>
+    <Company>czf</Company>
+    <Description>Wrapper for Kroger API</Description>
+    <PackageTags>Kroger</PackageTags>
+    <PackageReleaseNotes>1.0.0 Initial version
+Allows store search, search all for products only, product details</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Czf.Kroger.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+</Project>

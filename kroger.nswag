@@ -1,0 +1,69 @@
+﻿{
+  "runtime": "WinX64",
+  "swaggerGenerator": {
+    "fromSwagger": {
+      "json": "{\r\n  \"openapi\": \"3.0.0\",\r\n  \"info\": {\r\n    \"description\": \"https://editor.swagger.io/\",\r\n    \"version\": \"\",\r\n    \"title\": \"Kroger product API\"\r\n  },\r\n  \"tags\": [\r\n    {\r\n      \"name\": \"Product\",\r\n      \"description\": \"retrieve product info\"\r\n    }\r\n  ],\r\n  \"paths\": {\r\n    \"/products/api/products/details\": {\r\n      \"post\": {\r\n        \"tags\": [\r\n          \"Product\"\r\n        ],\r\n        \"summary\": \"\",\r\n        \"description\": \"\",\r\n        \"requestBody\": {\r\n          \"description\": \"the products requested\",\r\n          \"required\": true,\r\n          \"content\": {\r\n            \"application/json\": {\r\n              \"schema\": {\r\n                \"$ref\": \"#/components/schemas/ProductsRequest\"\r\n              },\r\n              \"example\": {\r\n                \"upcs\": [\r\n                  \"0001111087720\",\r\n                  \"0001111060828\"\r\n                ],\r\n                \"filterBadProducts\": false\r\n              }\r\n            }\r\n          }\r\n        },\r\n        \"parameters\": [\r\n          {\r\n            \"in\": \"header\",\r\n            \"name\": \"store-id\",\r\n            \"description\": \"the id for the store\",\r\n            \"required\": true,\r\n            \"schema\": {\r\n              \"type\": \"integer\"\r\n            }\r\n          },\r\n          {\r\n            \"in\": \"header\",\r\n            \"name\": \"division-id\",\r\n            \"description\": \"the division for the store\",\r\n            \"required\": true,\r\n            \"schema\": {\r\n              \"type\": \"integer\"\r\n            }\r\n          }\r\n        ],\r\n        \"responses\": {\r\n          \"200\": {\r\n            \"content\": {\r\n              \"application/json\": {\r\n                \"schema\": {\r\n                  \"$ref\": \"#/components/schemas/ProductsResponse\"\r\n                }\r\n              }\r\n            },\r\n            \"description\": \"success\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"components\": {\r\n    \"schemas\": {\r\n      \"Category\": {\r\n        \"type\": \"object\",\r\n        \"properties\": {\r\n          \"name\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"code\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"categoryCode\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"categoryName\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"category\": {\r\n            \"type\": \"string\"\r\n          }\r\n        }\r\n      },\r\n      \"ImageData\": {\r\n        \"type\": \"object\",\r\n        \"properties\": {\r\n          \"url\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"perspective\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"size\": {\r\n            \"type\": \"string\"\r\n          }\r\n        }\r\n      },\r\n      \"Product\": {\r\n        \"type\": \"object\",\r\n        \"properties\": {\r\n          \"brandName\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"clickListItem\": {\r\n            \"type\": \"boolean\"\r\n          },\r\n          \"countryOfOrigin\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"customerFacingSize\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"description\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"forceSize\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"homeDeliveryItem\": {\r\n            \"type\": \"boolean\"\r\n          },\r\n          \"images\": {\r\n            \"type\": \"array\",\r\n            \"items\": {\r\n              \"$ref\": \"#/components/schemas/ImageData\"\r\n            }\r\n          },\r\n          \"mainImagePerspective\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"multipackItem\": {\r\n            \"type\": \"boolean\"\r\n          },\r\n          \"multipackQuantity\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"options\": {\r\n            \"type\": \"array\",\r\n            \"items\": {\r\n              \"type\": \"object\"\r\n            }\r\n          },\r\n          \"romanceDescription\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"seoDescription\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"serviceCounter\": {\r\n            \"type\": \"object\",\r\n            \"nullable\": true\r\n          },\r\n          \"shipToHomeItem\": {\r\n            \"type\": \"boolean\"\r\n          },\r\n          \"soldInStore\": {\r\n            \"type\": \"boolean\"\r\n          },\r\n          \"temperatureIndicator\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"verified\": {\r\n            \"type\": \"boolean\"\r\n          },\r\n          \"mainImage\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"slug\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"categories\": {\r\n            \"type\": \"array\",\r\n            \"items\": {\r\n              \"$ref\": \"#/components/schemas/Category\"\r\n            }\r\n          },\r\n          \"calculatedPromoPrice\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"calculatedRegularPrice\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"calculatedReferencePrice\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"displayTemplate\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"division\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"minimumAdvertisedPrice\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"orderBy\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"regularNFor\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"referencePrice\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"store\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"endDate\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"priceNormal\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"priceSale\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"promoDescription\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"promoType\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"soldBy\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"promoNFor\": {\r\n            \"type\": \"string\"\r\n          },\r\n          \"upc\": {\r\n            \"type\": \"string\",\r\n            \"minLength\": 10,\r\n            \"maxLength\": 16\r\n          },\r\n          \"couponId\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"offers\": {\r\n            \"type\": \"array\",\r\n            \"items\": {\r\n              \"type\": \"object\"\r\n            }\r\n          },\r\n          \"couponIds\": {\r\n            \"type\": \"array\",\r\n            \"items\": {\r\n              \"type\": \"object\"\r\n            }\r\n          },\r\n          \"hasPrice\": {\r\n            \"type\": \"boolean\"\r\n          },\r\n          \"loyalMember\": {\r\n            \"type\": \"boolean\"\r\n          },\r\n          \"primaryIndex\": {\r\n            \"type\": \"string\",\r\n            \"nullable\": true\r\n          },\r\n          \"curbsidePickupEligible\": {\r\n            \"type\": \"boolean\"\r\n          }\r\n        }\r\n      },\r\n      \"ProductsRequest\": {\r\n        \"type\": \"object\",\r\n        \"properties\": {\r\n          \"upcs\": {\r\n            \"type\": \"array\",\r\n            \"items\": {\r\n              \"type\": \"string\"\r\n            }\r\n          },\r\n          \"filterBadProducts\": {\r\n            \"type\": \"boolean\"\r\n          }\r\n        }\r\n      },\r\n      \"ProductsResponse\": {\r\n        \"type\": \"object\",\r\n        \"properties\": {\r\n          \"products\": {\r\n            \"type\": \"array\",\r\n            \"items\": {\r\n              \"$ref\": \"#/components/schemas/Product\"\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+      "url": "http://petstore.swagger.io/v2/swagger.json",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "swaggerToCSharpClient": {
+      "generateClientClasses": true,
+      "generateClientInterfaces": false,
+      "generateDtoTypes": true,
+      "injectHttpClient": false,
+      "disposeHttpClient": true,
+      "generateExceptionClasses": true,
+      "exceptionClass": "SwaggerException",
+      "wrapDtoExceptions": true,
+      "useHttpClientCreationMethod": false,
+      "httpClientType": "System.Net.Http.HttpClient",
+      "useHttpRequestMessageCreationMethod": false,
+      "useBaseUrl": true,
+      "generateBaseUrlProperty": true,
+      "generateSyncMethods": false,
+      "exposeJsonSerializerSettings": false,
+      "clientClassAccessModifier": "public",
+      "typeAccessModifier": "public",
+      "generateContractsOutput": false,
+      "parameterDateTimeFormat": "s",
+      "generateUpdateJsonSerializerSettingsMethod": true,
+      "serializeTypeInformation": false,
+      "queryNullValue": "",
+      "className": "{controller}Client",
+      "operationGenerationMode": "MultipleClientsFromOperationId",
+      "generateOptionalParameters": false,
+      "generateJsonMethods": true,
+      "enforceFlagEnums": false,
+      "parameterArrayType": "System.Collections.Generic.IEnumerable",
+      "parameterDictionaryType": "System.Collections.Generic.IDictionary",
+      "responseArrayType": "System.Collections.ObjectModel.ObservableCollection",
+      "responseDictionaryType": "System.Collections.Generic.Dictionary",
+      "wrapResponses": false,
+      "generateResponseClasses": true,
+      "responseClass": "SwaggerResponse",
+      "namespace": "Kroger",
+      "requiredPropertiesMustBeDefined": true,
+      "dateType": "System.DateTime",
+      "dateTimeType": "System.DateTime",
+      "timeType": "System.TimeSpan",
+      "timeSpanType": "System.TimeSpan",
+      "arrayType": "System.Collections.ObjectModel.ObservableCollection",
+      "dictionaryType": "System.Collections.Generic.Dictionary",
+      "arrayBaseType": "System.Collections.ObjectModel.ObservableCollection",
+      "dictionaryBaseType": "System.Collections.Generic.Dictionary",
+      "classStyle": "Poco",
+      "generateDefaultValues": true,
+      "generateDataAnnotations": true,
+      "excludedTypeNames": [],
+      "handleReferences": false,
+      "generateImmutableArrayProperties": false,
+      "generateImmutableDictionaryProperties": false,
+      "serviceSchemes": [
+        "https"
+      ],
+      "output": null
+    }
+  }
+}

@@ -11,6 +11,8 @@
     <PackageTags>Kroger</PackageTags>
     <PackageReleaseNotes>1.0.0 Initial version
 Allows store search, search all for products only, product details</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/czf/Kroger-API-Wrapper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/czf/Kroger-API-Wrapper</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

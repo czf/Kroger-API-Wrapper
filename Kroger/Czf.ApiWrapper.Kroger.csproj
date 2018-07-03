@@ -2,21 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Czf.apiwrapper.Kroger</AssemblyName>
-    <RootNamespace>Czf.ApiWrappers.Kroger</RootNamespace>
+    <AssemblyName>Czf.ApiWrapper.Kroger</AssemblyName>
+    <RootNamespace>Czf.ApiWrapper.Kroger</RootNamespace>
     <Authors>czf</Authors>
     <PackageId>Czf.apiwrapper.Kroger</PackageId>
-    <Company>czf</Company>
+	  <Title>Kroger API Wrapper</Title> 
+	  <Company>czf</Company>
     <Description>Wrapper for Kroger API</Description>
     <PackageTags>Kroger</PackageTags>
-    <PackageReleaseNotes>1.0.0 Initial version
-Allows store search, search all for products only, product details</PackageReleaseNotes>
+    <PackageReleaseNotes>fix whatever was preventing xml comments from being included.</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/czf/Kroger-API-Wrapper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/czf/Kroger-API-Wrapper</RepositoryUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Czf.Kroger.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\Czf.ApiWrapper.Kroger.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

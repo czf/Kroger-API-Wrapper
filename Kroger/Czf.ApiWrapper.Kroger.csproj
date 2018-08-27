@@ -10,10 +10,12 @@
 	  <Company>czf</Company>
     <Description>Wrapper for Kroger API</Description>
     <PackageTags>Kroger</PackageTags>
-    <PackageReleaseNotes>fix whatever was preventing xml comments from being included.</PackageReleaseNotes>
+    <PackageReleaseNotes>Correct CalculateRegularPrice to CalculatedRegularPrice</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/czf/Kroger-API-Wrapper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/czf/Kroger-API-Wrapper</RepositoryUrl>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

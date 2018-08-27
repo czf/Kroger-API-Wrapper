@@ -29,7 +29,7 @@ namespace Czf.ApiWrapper.Kroger.Domain
         public string Slug { get; set; }
         public List<ProductCategory> Categories { get; set; }
         public decimal? CalculatedPromoPrice { get; set; } // guessed type
-        public decimal? CalculateRegularPrice { get; set; }
+        public decimal? CalculatedRegularPrice { get; set; }
         public decimal? CalculatedReferencePrice { get; set; }
         public string DisplayTemplate { get; set; }
         public string Division { get; set; }

@@ -24,7 +24,7 @@ namespace NUnit.Tests
         [Test]
         public void ProductsDetailsTest()
         {
-            ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             KrogerClient client = new KrogerClient();
             ProductsDetailsResponse response = client.ProductsDetailsAsync(
                 new ProductsDetailsRequest()
@@ -33,14 +33,32 @@ namespace NUnit.Tests
                     FilterBadProducts = false
                 }
                 ).Result;
+
+            response = client.ProductsDetailsAsync(
+                new ProductsDetailsRequest()
+                {
+                    UPCs = new List<string>() { "0001111087720", "0001111060828", "0001111060826" },
+                    FilterBadProducts = false
+                }
+                ).Result;
         }
 
         [Test]
-        public void ProductsDetailsWithStoreInfoTest()
+        public void AProductsDetailsWithStoreInfoTest()
         {
-            ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             KrogerClient client = new KrogerClient();
             ProductsDetailsResponse response = client.ProductsDetailsAsync(
+                new ProductsDetailsRequest()
+                {
+                    UPCs = new List<string>() { "0001111087720", "0001111060828", "0001111060826" },
+                    FilterBadProducts = false,
+                    StoreId = "00122",
+                    DivisionId = "701"
+                }
+                ).Result;
+
+            response = client.ProductsDetailsAsync(
                 new ProductsDetailsRequest()
                 {
                     UPCs = new List<string>() { "0001111087720", "0001111060828", "0001111060826" },
@@ -68,7 +86,8 @@ namespace NUnit.Tests
         [Test]
         public void StoreSearchTest()
         {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            System.Net.ServicePointManager.Expect100Continue = false;
+            ServicePointManager.SecurityProtocol =  SecurityProtocolType.Tls12;
             KrogerClient client = new KrogerClient();
             var response = client.StoreSearchAsync("kansas city").Result;
 
@@ -79,7 +98,24 @@ namespace NUnit.Tests
             Assert.That(response.Fuel.Any(x => x.DivisionNumber != null));
             Assert.That(response.Stores.Any(x => x.StoreNumber != null));
 
-            
+        }
+
+
+        [Test]
+        public void RestSharpTest()
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            KrogerClient client = new KrogerClient();
+            var r = client.ProductRestSharp(new ProductsDetailsRequest()
+            {
+                UPCs = new List<string>() { "0001111087720", "0001111060828", "0001111060826" },
+                FilterBadProducts = false
+            });
+
+
+            Assert.NotNull(r.Products);
+            Assert.That(r.Products.Any());
+
         }
     }
 }

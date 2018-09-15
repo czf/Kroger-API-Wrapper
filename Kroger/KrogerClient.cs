@@ -9,6 +9,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
+using RestSharp.Deserializers;
+using RestSharp.Serializers;
+using RestSharp;
+using System.IO;
+
 namespace Czf.ApiWrapper.Kroger
 {
 
@@ -22,7 +27,7 @@ namespace Czf.ApiWrapper.Kroger
         private static readonly Uri BASE_URL = new Uri("https://www.kroger.com/");
         private const string STORES_GRAPHQL_ENDPOINT = "stores/api/graphql";
         ///two parameters searchtext={0}, filters={1}
-        private const string STORE_SEARCH_PAYLOAD = "{{\"query\":\"\\n      query storeSearch($searchText: String!, $filters: [String]!) {{\\n        storeSearch(searchText: $searchText, filters: $filters) {{\\n          stores {{\\n            ...storeSearchResult\\n          }}\\n          fuel {{\\n            ...storeSearchResult\\n          }}\\n          shouldShowFuelMessage\\n        }}\\n      }}\\n      \\n  fragment storeSearchResult on Store {{\\n    banner\\n    vanityName\\n    divisionNumber\\n    storeNumber\\n    phoneNumber\\n    showWeeklyAd\\n    showShopThisStoreAndPreferredStoreButtons\\n    distance\\n    latitude\\n    longitude\\n    address {{\\n      addressLine1\\n      addressLine2\\n      city\\n      countryCode\\n      stateCode\\n      zip\\n    }}\\n    pharmacy {{\\n      phoneNumber\\n    }}\\n    departments {{\\n      code\\n    }}\\n    fulfillmentMethods{{\\n      hasPickup\\n      hasDelivery\\n    }}\\n  }}\\n\",\"variables\":{{\"searchText\":\"{0}\",\"filters\":[{1}]}},\"operationName\":\"storeSearch\"}}";
+        private const string STORE_SEARCH_PAYLOAD = "{{\"query\":\"\\n  query storeSearch($searchText: String!, $filters: [String]!) {{\\n        storeSearch(searchText: $searchText, filters: $filters) {{\\n          stores {{\\n            ...storeSearchResult\\n          }}\\n          fuel {{\\n            ...storeSearchResult\\n          }}\\n          shouldShowFuelMessage\\n        }}\\n      }}\\n      \\n  fragment storeSearchResult on Store {{\\n    banner\\n    vanityName\\n    divisionNumber\\n    storeNumber\\n    phoneNumber\\n    showWeeklyAd\\n    showShopThisStoreAndPreferredStoreButtons\\n    distance\\n    latitude\\n    longitude\\n    address {{\\n      addressLine1\\n      addressLine2\\n      city\\n      countryCode\\n      stateCode\\n      zip\\n    }}\\n    pharmacy {{\\n      phoneNumber\\n    }}\\n    departments {{\\n      code\\n    }}\\n    fulfillmentMethods{{\\n      hasPickup\\n      hasDelivery\\n                 }}\\n  }}\\n\",\"variables\":{{\"searchText\":\"{0}\",\"filters\":[{1}]}},\"operationName\":\"storeSearch\"}}";
 
         ///four parameters start={0}, count={1}, query={2}, tab={3}
         private const string SITE_SEARCH_ALL= "search/api/searchAll?start={0}&count={1}&query={2}&tab={3}&monet=true";
@@ -52,8 +57,11 @@ namespace Czf.ApiWrapper.Kroger
             _client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("*/*"));
             _client.DefaultRequestHeaders.Add("Cookie", "");
             _client.DefaultRequestHeaders.Add("User-Agent", "_/_");
+            //_client.DefaultRequestHeaders.Add("accept-encoding","gzip, deflate");
             _client.BaseAddress = BASE_URL;
             _client.Timeout.Add(new TimeSpan(0, 3, 0));
+            
+            //_client.DefaultRequestHeaders.ConnectionClose = true;
         }
         #endregion Constructors
 
@@ -104,6 +112,8 @@ namespace Czf.ApiWrapper.Kroger
                     content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
                     using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, PRODUCTS_DETAILS_ENDPOINT) { Content = content })
                     {
+                        requestMessage.Headers.ExpectContinue = false;
+                        
                         if (request.StoreId != null && request.DivisionId != null)
                         {
                             requestMessage.Headers.Add("store-id", request.StoreId);
@@ -147,12 +157,12 @@ namespace Czf.ApiWrapper.Kroger
         {
             SearchAllResponse response = null;
             string urlQuery = string.Format(SITE_SEARCH_ALL, request.Start, request.Count, request.Query, 0); //0 products tab
-                using (HttpResponseMessage responseMsg =  await _client.PostAsync(urlQuery, new StringContent("")))
-                {
+            using (HttpResponseMessage responseMsg =  await _client.PostAsync(urlQuery, new StringContent("")))
+            {
 
-                    string responseContent = responseMsg.Content.ReadAsStringAsync().Result;
-                    response = JsonConvert.DeserializeObject<SearchAllResponse>(responseContent);
-                }
+                string responseContent = responseMsg.Content.ReadAsStringAsync().Result;
+                response = JsonConvert.DeserializeObject<SearchAllResponse>(responseContent);
+            }
 
             return response;
         }
@@ -230,8 +240,94 @@ namespace Czf.ApiWrapper.Kroger
         }
 
                
+        public ProductsDetailsResponse ProductRestSharp(ProductsDetailsRequest prodRequest)
+        {
+            var client = new RestClient("https://www.kroger.com/");
+            
+            client.UserAgent = "_/_";
+            client.AutomaticDecompression = false;
+            var request = new RestRequest(PRODUCTS_DETAILS_ENDPOINT, Method.POST);
+            request.AddHeader("Accept-Encoding", null);
+            request.AddHeader("User-Agent", "_/_");
+            request.AddCookie("X", "5");
+            request.AddHeader("Accept", "*/*");
+            request.JsonSerializer = new RestSharpJsonSerializer();
+            request.AddJsonBody(prodRequest);
+            
+            
+            IRestResponse<ProductsDetailsResponse> response = client.Execute<ProductsDetailsResponse>(request);
+            var f = response.Data;
+             response = client.Execute<ProductsDetailsResponse>(request);
+            return response.Data;
+            
+            //_client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("*/*"));
+            //_client.DefaultRequestHeaders.Add("Cookie", "");
+            //_client.DefaultRequestHeaders.Add("User-Agent", "_/_");
 
-        
+        }
+
         #endregion Public
+    }
+
+
+
+
+public class RestSharpJsonSerializer : ISerializer, IDeserializer
+    {
+        private readonly Newtonsoft.Json.JsonSerializer _serializer;
+
+        public RestSharpJsonSerializer()
+        {
+            ContentType = "application/json";
+            _serializer = new Newtonsoft.Json.JsonSerializer
+            {
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                NullValueHandling = NullValueHandling.Include,
+                DefaultValueHandling = DefaultValueHandling.Include,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
+            };
+        }
+
+        public RestSharpJsonSerializer(Newtonsoft.Json.JsonSerializer serializer)
+        {
+            ContentType = "application/json";
+            _serializer = serializer;
+        }
+
+        public string Serialize(object obj)
+        {
+            using (var stringWriter = new StringWriter())
+            {
+                using (var jsonTextWriter = new JsonTextWriter(stringWriter))
+                {
+                    jsonTextWriter.Formatting = Formatting.Indented;
+                    jsonTextWriter.QuoteChar = '"';
+
+                    _serializer.Serialize(jsonTextWriter, obj);
+
+                    var result = stringWriter.ToString();
+                    return result;
+                }
+            }
+        }
+
+        public string DateFormat { get; set; }
+        public string RootElement { get; set; }
+        public string Namespace { get; set; }
+        public string ContentType { get; set; }
+
+        public T Deserialize<T>(RestSharp.IRestResponse response)
+        {
+            var content = response.Content;
+
+            using (var stringReader = new StringReader(content))
+            {
+                using (var jsonTextReader = new JsonTextReader(stringReader))
+                {
+                    return _serializer.Deserialize<T>(jsonTextReader);
+                }
+            }
+        }
     }
 }

@@ -90,18 +90,24 @@ namespace NUnit.Tests
             ServicePointManager.SecurityProtocol =  SecurityProtocolType.Tls12;
             KrogerClient client = new KrogerClient();
             var response = client.StoreSearchAsync("kansas city").Result;
+            var response2 = client.StoreSearchAsync("kansas city").Result;
 
             Assert.NotNull(response);
+            Assert.NotNull(response2);
             Assert.NotNull(response.Fuel);
+            Assert.NotNull(response2.Fuel);
             Assert.NotNull(response.Stores);
+            Assert.NotNull(response2.Stores);
             
             Assert.That(response.Fuel.Any(x => x.DivisionNumber != null));
+            Assert.That(response2.Fuel.Any(x => x.DivisionNumber != null));
             Assert.That(response.Stores.Any(x => x.StoreNumber != null));
+            Assert.That(response2.Stores.Any(x => x.StoreNumber != null));
 
         }
 
 
-        [Test]
+        
         public void RestSharpTest()
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;

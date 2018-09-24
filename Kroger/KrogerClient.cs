@@ -21,20 +21,20 @@ namespace Czf.ApiWrapper.Kroger
     /// Tls 1.2 should be added to acceptable security protocols before instantiation of any httpclient objects. 
     /// <code>ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;</code>
     /// </summary>
-    public class KrogerClient : IDisposable
+    public class KrogerClient
     {
         #region private
         private static readonly Uri BASE_URL = new Uri("https://www.kroger.com/");
         private const string STORES_GRAPHQL_ENDPOINT = "stores/api/graphql";
         ///two parameters searchtext={0}, filters={1}
-        private const string STORE_SEARCH_PAYLOAD = "{{\"query\":\"\\n  query storeSearch($searchText: String!, $filters: [String]!) {{\\n        storeSearch(searchText: $searchText, filters: $filters) {{\\n          stores {{\\n            ...storeSearchResult\\n          }}\\n          fuel {{\\n            ...storeSearchResult\\n          }}\\n          shouldShowFuelMessage\\n        }}\\n      }}\\n      \\n  fragment storeSearchResult on Store {{\\n    banner\\n    vanityName\\n    divisionNumber\\n    storeNumber\\n    phoneNumber\\n    showWeeklyAd\\n    showShopThisStoreAndPreferredStoreButtons\\n    distance\\n    latitude\\n    longitude\\n    address {{\\n      addressLine1\\n      addressLine2\\n      city\\n      countryCode\\n      stateCode\\n      zip\\n    }}\\n    pharmacy {{\\n      phoneNumber\\n    }}\\n    departments {{\\n      code\\n    }}\\n    fulfillmentMethods{{\\n      hasPickup\\n      hasDelivery\\n                 }}\\n  }}\\n\",\"variables\":{{\"searchText\":\"{0}\",\"filters\":[{1}]}},\"operationName\":\"storeSearch\"}}";
+        private const string STORE_SEARCH_PAYLOAD = "{{\"query\":\"\\n      query storeSearch($searchText: String!, $filters: [String]!) {{\\n        storeSearch(searchText: $searchText, filters: $filters) {{\\n          stores {{\\n            ...storeSearchResult\\n          }}\\n          fuel {{\\n            ...storeSearchResult\\n          }}\\n          shouldShowFuelMessage\\n        }}\\n      }}\\n      \\n  fragment storeSearchResult on Store {{\\n    banner\\n    vanityName\\n    divisionNumber\\n    storeNumber\\n    phoneNumber\\n    showWeeklyAd\\n    showShopThisStoreAndPreferredStoreButtons\\n    distance\\n    latitude\\n    longitude\\n    address {{\\n      addressLine1\\n      addressLine2\\n      city\\n      countryCode\\n      stateCode\\n      zip\\n    }}\\n    pharmacy {{\\n      phoneNumber\\n    }}\\n    departments {{\\n      code\\n    }}\\n    fulfillmentMethods{{\\n      hasPickup\\n      hasDelivery\\n    }}\\n  }}\\n\",\"variables\":{{\"searchText\":\"{0}\",\"filters\":[{1}]}},\"operationName\":\"storeSearch\"}}";
 
         ///four parameters start={0}, count={1}, query={2}, tab={3}
         private const string SITE_SEARCH_ALL= "search/api/searchAll?start={0}&count={1}&query={2}&tab={3}&monet=true";
 
         private const string PRODUCTS_DETAILS_ENDPOINT = "products/api/products/details";
         private bool disposedValue = false;
-        private HttpClient _client;
+        private IRestClient _client;
 
         #endregion
 
@@ -43,53 +43,28 @@ namespace Czf.ApiWrapper.Kroger
         /// Tls 1.2 should be added to acceptable security protocols before instantiation of any httpclient objects. 
         /// <code>ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;</code>
         /// </summary>
-        public KrogerClient() : this(new HttpClient(new HttpClientHandler() { UseCookies = false })) { }
+        public KrogerClient() : this(new RestClient()) { }
 
-        /// <summary>
-        /// Create a client.
-        /// Tls 1.2 should be added to acceptable security protocols before instantiation of any httpclient objects. 
-        /// <code>ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;</code>
-        /// </summary>
-        /// <param name="client">client should have a client handler that has UseCookies: false</param>
-        public KrogerClient(HttpClient client)
-        {
-            _client = client;
-            _client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("*/*"));
-            _client.DefaultRequestHeaders.Add("Cookie", "");
-            _client.DefaultRequestHeaders.Add("User-Agent", "_/_");
-            //_client.DefaultRequestHeaders.Add("accept-encoding","gzip, deflate");
-            _client.BaseAddress = BASE_URL;
-            _client.Timeout.Add(new TimeSpan(0, 3, 0));
+        ///// <summary>
+        ///// Create a client.
+        ///// Tls 1.2 should be added to acceptable security protocols before instantiation of any httpclient objects. 
+        ///// <code>ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;</code>
+        ///// </summary>
+        ///// <param name="client">client should have a client handler that has UseCookies: false</param>
+        //public KrogerClient(HttpClient client)
+        //{
+        //    _client = client;
+        //    _client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("*/*"));
+        //    _client.DefaultRequestHeaders.Add("Cookie", "");
+        //    _client.DefaultRequestHeaders.Add("User-Agent", "_/_");
+        //    //_client.DefaultRequestHeaders.Add("accept-encoding","gzip, deflate");
+        //    _client.BaseAddress = BASE_URL;
+        //    _client.Timeout.Add(new TimeSpan(0, 3, 0));
             
-            //_client.DefaultRequestHeaders.ConnectionClose = true;
-        }
+        //    //_client.DefaultRequestHeaders.ConnectionClose = true;
+        //}
         #endregion Constructors
 
-
-        #region IDisposable Support
-
-        protected virtual void Dispose(bool disposing)
-        {
-         
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _client.Dispose();
-                }
-
-                disposedValue = true;
-            }
-        }
-
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-        }
-        #endregion
 
         #region Public
         /// <summary>
@@ -107,32 +82,27 @@ namespace Czf.ApiWrapper.Kroger
             {
                 tries--;
                 failed = false;
-                using (HttpContent content = new StringContent(payload))
+                try
                 {
-                    content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-                    using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, PRODUCTS_DETAILS_ENDPOINT) { Content = content })
+                    IRestRequest restRequest = new RestRequest(PRODUCTS_DETAILS_ENDPOINT, Method.POST);
+                    restRequest.JsonSerializer = new IDeserializerNewtonsoft();
+                    restRequest.AddJsonBody(request);
+                    restRequest.AddCookie("_", "_"); //a cookie is required by the request contract, 
+                                                     //restsharp requires that this not be an empty string in order for the header be set
+                    if (request.StoreId != null && request.DivisionId != null)
                     {
-                        requestMessage.Headers.ExpectContinue = false;
-                        
-                        if (request.StoreId != null && request.DivisionId != null)
-                        {
-                            requestMessage.Headers.Add("store-id", request.StoreId);
-                            requestMessage.Headers.Add("division-id", request.DivisionId);
-                        }
-
-                        using (HttpResponseMessage response = await _client.SendAsync(requestMessage))
-                        {
-                            try
-                            {
-                                string responseContent = response.Content.ReadAsStringAsync().Result;
-                                productDetailsResponse = JsonConvert.DeserializeObject<ProductsDetailsResponse>(responseContent);
-                            }
-                            catch (JsonReaderException)
-                            {
-                                failed = true;
-                            }
-                        }
+                        restRequest.AddHeader("store-id", request.StoreId);
+                        restRequest.AddHeader("division-id", request.DivisionId);
                     }
+
+
+                    IRestResponse<ProductsDetailsResponse> restResponse = await _client.ExecutePostTaskAsync<ProductsDetailsResponse>(restRequest);
+                    productDetailsResponse = restResponse.Data;
+                                
+                }
+                catch (JsonReaderException)
+                {
+                    failed = true;
                 }
             } while (tries > 0 && failed);
             return productDetailsResponse;
@@ -157,12 +127,16 @@ namespace Czf.ApiWrapper.Kroger
         {
             SearchAllResponse response = null;
             string urlQuery = string.Format(SITE_SEARCH_ALL, request.Start, request.Count, request.Query, 0); //0 products tab
-            using (HttpResponseMessage responseMsg =  await _client.PostAsync(urlQuery, new StringContent("")))
-            {
 
-                string responseContent = responseMsg.Content.ReadAsStringAsync().Result;
-                response = JsonConvert.DeserializeObject<SearchAllResponse>(responseContent);
-            }
+            
+
+            IRestRequest restRequest = new RestRequest(urlQuery, Method.POST);
+            restRequest.AddCookie("_", "_"); //a cookie is required by the request contract, 
+                                             //restsharp requires that this not be an empty string in order for the header be set
+
+            IRestResponse<SearchAllResponse> restResponse = await _client.ExecutePostTaskAsync<SearchAllResponse>(restRequest);
+            response = restResponse.Data;
+            
 
             return response;
         }
@@ -201,26 +175,29 @@ namespace Czf.ApiWrapper.Kroger
             {
                 tries--;
                 failed = false;
-                using (HttpContent content = new StringContent(payload))
-                using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, STORES_GRAPHQL_ENDPOINT) { Content =content})
-                using (HttpResponseMessage response = await _client.SendAsync(requestMessage))
+                
+                try
                 {
-                    try
-                    {
-                        string responseContent = response.Content.ReadAsStringAsync().Result;
-                        storeSearchResponse = JsonConvert.DeserializeObject<StoreSearchResponse>(responseContent, new StoreSearchResponseCustomJsonConverter());
-                    }
-                    catch (JsonReaderException)
-                    {
-                        failed = true;
-                    }            
+                    IRestRequest restRequest = new RestRequest(STORES_GRAPHQL_ENDPOINT, Method.POST);
+                    restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+                    restRequest.AddCookie("_", "_"); //a cookie is required by the request contract, 
+                                                     //restsharp requires that this not be an empty string in order for the header be set
+                                        
+                    IRestResponse<StoreSearchResponse> restResponse = 
+                        await _client.ExecutePostTaskAsync<StoreSearchResponse>(restRequest);
+                    storeSearchResponse = restResponse.Data;
                 }
+                catch (JsonReaderException)
+                {
+                    failed = true;
+                }
+                
             }while (tries > 0 && failed);
             return storeSearchResponse;
         }
 
         /// <summary>
-        /// Synchronoously fetch stores using the specified input
+        /// Synchronously fetch stores using the specified input
         /// </summary>
         /// <param name="zipCity"></param>
         /// <returns></returns>
@@ -230,7 +207,7 @@ namespace Czf.ApiWrapper.Kroger
         }
 
         /// <summary>
-        /// Synchronoously fetch stores using the request
+        /// Synchronously fetch stores using the request
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -239,6 +216,19 @@ namespace Czf.ApiWrapper.Kroger
             return StoreSearchAsync(request).Result;
         }
 
+        public KrogerClient(IRestClient client)
+        {
+            _client = client;
+            _client.ClearHandlers();
+
+            IDeserializer deserializer = new IDeserializerNewtonsoft();
+
+            _client.AddHandler(MediaTypeWithQualityHeaderValue.Parse("*/*").MediaType, deserializer);
+            _client.AddHandler(MediaTypeWithQualityHeaderValue.Parse("application/json;charset=UFT-8").MediaType, deserializer);
+            _client.AddDefaultHeader("Cookie", "_=_;");
+            _client.BaseUrl = BASE_URL;
+            _client.UserAgent = "_/_";
+        }
                
         public ProductsDetailsResponse ProductRestSharp(ProductsDetailsRequest prodRequest)
         {
@@ -251,7 +241,7 @@ namespace Czf.ApiWrapper.Kroger
             request.AddHeader("User-Agent", "_/_");
             request.AddCookie("X", "5");
             request.AddHeader("Accept", "*/*");
-            request.JsonSerializer = new RestSharpJsonSerializer();
+            request.JsonSerializer = new IDeserializerNewtonsoft();
             request.AddJsonBody(prodRequest);
             
             
@@ -272,11 +262,11 @@ namespace Czf.ApiWrapper.Kroger
 
 
 
-public class RestSharpJsonSerializer : ISerializer, IDeserializer
+public class IDeserializerNewtonsoft : ISerializer, IDeserializer
     {
         private readonly Newtonsoft.Json.JsonSerializer _serializer;
 
-        public RestSharpJsonSerializer()
+        public IDeserializerNewtonsoft()
         {
             ContentType = "application/json";
             _serializer = new Newtonsoft.Json.JsonSerializer
@@ -287,9 +277,10 @@ public class RestSharpJsonSerializer : ISerializer, IDeserializer
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,
                 DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
             };
+            _serializer.Converters.Add(new StoreSearchResponseCustomJsonConverter());
         }
 
-        public RestSharpJsonSerializer(Newtonsoft.Json.JsonSerializer serializer)
+        public IDeserializerNewtonsoft(Newtonsoft.Json.JsonSerializer serializer)
         {
             ContentType = "application/json";
             _serializer = serializer;

@@ -2,17 +2,13 @@
 using Czf.ApiWrapper.Kroger.Responses;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 using RestSharp.Deserializers;
-using RestSharp.Serializers;
+
 using RestSharp;
-using System.IO;
+using Czf.ApiWrapper.Kroger.Restsharp;
 
 namespace Czf.ApiWrapper.Kroger
 {
@@ -50,19 +46,20 @@ namespace Czf.ApiWrapper.Kroger
         ///// Tls 1.2 should be added to acceptable security protocols before instantiation of any httpclient objects. 
         ///// <code>ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;</code>
         ///// </summary>
-        ///// <param name="client">client should have a client handler that has UseCookies: false</param>
-        //public KrogerClient(HttpClient client)
-        //{
-        //    _client = client;
-        //    _client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("*/*"));
-        //    _client.DefaultRequestHeaders.Add("Cookie", "");
-        //    _client.DefaultRequestHeaders.Add("User-Agent", "_/_");
-        //    //_client.DefaultRequestHeaders.Add("accept-encoding","gzip, deflate");
-        //    _client.BaseAddress = BASE_URL;
-        //    _client.Timeout.Add(new TimeSpan(0, 3, 0));
-            
-        //    //_client.DefaultRequestHeaders.ConnectionClose = true;
-        //}
+        ///// <param name="client"></param>
+        public KrogerClient(IRestClient client)
+        {
+            _client = client;
+            _client.ClearHandlers();
+
+            IDeserializer deserializer = new NewtonsoftJsonSerializer ();
+
+            _client.AddHandler(MediaTypeWithQualityHeaderValue.Parse("*/*").MediaType, deserializer);
+            _client.AddHandler(MediaTypeWithQualityHeaderValue.Parse("application/json;charset=UFT-8").MediaType, deserializer);
+            _client.AddDefaultHeader("Cookie", "_=_;");
+            _client.BaseUrl = BASE_URL;
+            _client.UserAgent = "_/_";
+        }
         #endregion Constructors
 
 
@@ -85,7 +82,7 @@ namespace Czf.ApiWrapper.Kroger
                 try
                 {
                     IRestRequest restRequest = new RestRequest(PRODUCTS_DETAILS_ENDPOINT, Method.POST);
-                    restRequest.JsonSerializer = new IDeserializerNewtonsoft();
+                    restRequest.JsonSerializer = new NewtonsoftJsonSerializer ();
                     restRequest.AddJsonBody(request);
                     restRequest.AddCookie("_", "_"); //a cookie is required by the request contract, 
                                                      //restsharp requires that this not be an empty string in order for the header be set
@@ -216,19 +213,7 @@ namespace Czf.ApiWrapper.Kroger
             return StoreSearchAsync(request).Result;
         }
 
-        public KrogerClient(IRestClient client)
-        {
-            _client = client;
-            _client.ClearHandlers();
-
-            IDeserializer deserializer = new IDeserializerNewtonsoft();
-
-            _client.AddHandler(MediaTypeWithQualityHeaderValue.Parse("*/*").MediaType, deserializer);
-            _client.AddHandler(MediaTypeWithQualityHeaderValue.Parse("application/json;charset=UFT-8").MediaType, deserializer);
-            _client.AddDefaultHeader("Cookie", "_=_;");
-            _client.BaseUrl = BASE_URL;
-            _client.UserAgent = "_/_";
-        }
+        
                
         public ProductsDetailsResponse ProductRestSharp(ProductsDetailsRequest prodRequest)
         {
@@ -241,7 +226,7 @@ namespace Czf.ApiWrapper.Kroger
             request.AddHeader("User-Agent", "_/_");
             request.AddCookie("X", "5");
             request.AddHeader("Accept", "*/*");
-            request.JsonSerializer = new IDeserializerNewtonsoft();
+            request.JsonSerializer = new NewtonsoftJsonSerializer ();
             request.AddJsonBody(prodRequest);
             
             
@@ -262,63 +247,5 @@ namespace Czf.ApiWrapper.Kroger
 
 
 
-public class IDeserializerNewtonsoft : ISerializer, IDeserializer
-    {
-        private readonly Newtonsoft.Json.JsonSerializer _serializer;
-
-        public IDeserializerNewtonsoft()
-        {
-            ContentType = "application/json";
-            _serializer = new Newtonsoft.Json.JsonSerializer
-            {
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                NullValueHandling = NullValueHandling.Include,
-                DefaultValueHandling = DefaultValueHandling.Include,
-                DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                DateTimeZoneHandling = DateTimeZoneHandling.Unspecified
-            };
-            _serializer.Converters.Add(new StoreSearchResponseCustomJsonConverter());
-        }
-
-        public IDeserializerNewtonsoft(Newtonsoft.Json.JsonSerializer serializer)
-        {
-            ContentType = "application/json";
-            _serializer = serializer;
-        }
-
-        public string Serialize(object obj)
-        {
-            using (var stringWriter = new StringWriter())
-            {
-                using (var jsonTextWriter = new JsonTextWriter(stringWriter))
-                {
-                    jsonTextWriter.Formatting = Formatting.Indented;
-                    jsonTextWriter.QuoteChar = '"';
-
-                    _serializer.Serialize(jsonTextWriter, obj);
-
-                    var result = stringWriter.ToString();
-                    return result;
-                }
-            }
-        }
-
-        public string DateFormat { get; set; }
-        public string RootElement { get; set; }
-        public string Namespace { get; set; }
-        public string ContentType { get; set; }
-
-        public T Deserialize<T>(RestSharp.IRestResponse response)
-        {
-            var content = response.Content;
-
-            using (var stringReader = new StringReader(content))
-            {
-                using (var jsonTextReader = new JsonTextReader(stringReader))
-                {
-                    return _serializer.Deserialize<T>(jsonTextReader);
-                }
-            }
-        }
-    }
+    
 }
